@@ -12,7 +12,7 @@ export default function Home() {
     min: number;
     max: number;
   }>({ min: 10, max: 20 });
-  const [gradientInterval, setGradientInterval] = useState(0.5);
+  const [gradientInterval, setGradientInterval] = useState(1);
   const [waveSpawnInterval, setWaveSpawnInterval] = useState(1);
   const maxSteps = 5;
 
@@ -27,8 +27,8 @@ export default function Home() {
     };
     const waveSpawnIntervalMin = 0.3;
     const waveSpawnIntervalMax = 1;
-    const gradientIntervalMin = 0.2;
-    const gradientIntervalMax = 0.5;
+    const gradientIntervalMin = 0.5;
+    const gradientIntervalMax = 1;
 
     setWaveAmplitude({
       min: lerp(
@@ -51,22 +51,16 @@ export default function Home() {
   }, [intensivity]);
 
   return (
-    <div className="flex h-screen items-center justify-center gap-10 p-10">
-      <div className="relative flex items-center justify-center w-[300px] h-[610px] overflow-hidden rounded-[60px] pointer-events-none select-none">
-        <Image
-          src="/iphone.png"
-          alt="Iphone"
-          height={610}
-          width={300}
-          className="absolute"
-        />
+    <div className="flex h-screen items-center justify-center gap-10 lg:p-10">
+      <div className="relative flex items-center justify-center sm:w-[300px] sm:h-[610px] overflow-hidden rounded-[60px] pointer-events-none select-none">
+        <Image src="/iphone.png" alt="Iphone" fill className="absolute" />
 
         <div className="relative flex items-center justify-center w-[295px] h-[600px] overflow-hidden rounded-[60px]">
           <BorderWaves
             className="absolute"
-            width={290}
-            height={600}
-            radius={60}
+            width={280}
+            height={595}
+            radius={50}
             pointsPerMaxEdge={30}
             waveAmplitude={waveAmplitude}
             waveSpawnInterval={waveSpawnInterval}
@@ -77,13 +71,12 @@ export default function Home() {
         <Image
           src="/iphone-borders.png"
           alt="Iphone"
-          height={610}
-          width={300}
+          fill
           className="absolute"
         />
       </div>
 
-      <div className="flex flex-col items-center gap-10">
+      <div className="flex flex-col items-center gap-5 max-sm:absolute max-sm:mt-35">
         <Slider
           value={intensivity}
           onChange={setIntensivity}

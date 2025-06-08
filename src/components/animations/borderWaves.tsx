@@ -409,6 +409,9 @@ export default function BorderWaves(props: Props) {
   }
 
   return (
-    <canvas id="modalCanvas" className={`blur-xs ${props.className}`}></canvas>
+    <canvas
+      id="modalCanvas"
+      className={`blur-[2px] ${props.className}`}
+    ></canvas>
   );
 }
