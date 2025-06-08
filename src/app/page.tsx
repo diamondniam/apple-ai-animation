@@ -52,7 +52,7 @@ export default function Home() {
 
   return (
     <div className="flex h-screen items-center justify-center gap-10 p-10">
-      <div className="relative flex items-center justify-center w-[300px] h-[610px] overflow-hidden rounded-[60px]">
+      <div className="relative flex items-center justify-center w-[300px] h-[610px] overflow-hidden rounded-[60px] pointer-events-none select-none">
         <Image
           src="/iphone.png"
           alt="Iphone"
