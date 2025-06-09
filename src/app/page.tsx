@@ -2,7 +2,7 @@
 
 import BorderWaves from "@/components/animations/borderWaves";
 import { Slider } from "@/components/range/slider";
-import { lerp } from "@/utils";
+import { getRandomInt, lerp } from "@/utils";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -12,8 +12,9 @@ export default function Home() {
     min: number;
     max: number;
   }>({ min: 10, max: 20 });
-  const [gradientInterval, setGradientInterval] = useState(1);
+  const [gradientInterval, setGradientInterval] = useState(2);
   const [waveSpawnInterval, setWaveSpawnInterval] = useState(1);
+
   const maxSteps = 5;
 
   useEffect(() => {
@@ -25,10 +26,10 @@ export default function Home() {
       min: 20,
       max: 40,
     };
-    const waveSpawnIntervalMin = 0.3;
+    const waveSpawnIntervalMin = 0.5;
     const waveSpawnIntervalMax = 1;
     const gradientIntervalMin = 0.5;
-    const gradientIntervalMax = 1;
+    const gradientIntervalMax = 2;
 
     setWaveAmplitude({
       min: lerp(
@@ -55,14 +56,15 @@ export default function Home() {
       <div className="relative flex items-center justify-center sm:w-[300px] sm:h-[610px] overflow-hidden rounded-[60px] pointer-events-none select-none">
         <Image src="/iphone.png" alt="Iphone" fill className="absolute" />
 
-        <div className="relative flex items-center justify-center w-[295px] h-[600px] overflow-hidden rounded-[60px]">
+        <div className="relative flex items-center justify-center w-[295px] h-[600px] overflow-hidden rounded-[60px] [--webkit-mask-image:-webkit-radial-gradient(white,black)]">
           <BorderWaves
             className="absolute"
-            width={280}
-            height={595}
-            radius={50}
-            pointsPerMaxEdge={30}
+            width={270}
+            height={585}
+            radius={40}
+            pointsPerMaxEdge={60}
             waveAmplitude={waveAmplitude}
+            waveLength={{ min: 20, max: 30 }}
             waveSpawnInterval={waveSpawnInterval}
             gradientInterval={gradientInterval}
           />
@@ -76,7 +78,7 @@ export default function Home() {
         />
       </div>
 
-      <div className="flex flex-col items-center gap-5 max-sm:absolute max-sm:mt-35">
+      <div className="flex flex-col items-center gap-5 max-sm:absolute max-sm:mb-30">
         <Slider
           value={intensivity}
           onChange={setIntensivity}
@@ -85,7 +87,13 @@ export default function Home() {
           icon={<Image src="/power.png" alt="power" height={15} width={15} />}
         />
 
-        <Image src="/logo.png" alt="Logo" height={150} width={150} />
+        <Image
+          src="/logo.png"
+          alt="Logo"
+          height={150}
+          width={150}
+          className="max-sm:hidden"
+        />
       </div>
     </div>
   );

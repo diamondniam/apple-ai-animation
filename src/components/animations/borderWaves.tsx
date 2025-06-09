@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { GeneratedGradient, GradientState, Props, Wave } from "./types";
-import { getRandomInt, lerp, lerpColor } from "@/utils";
+import { getRandomInt, lerp, lerpColor, rgbaToArray } from "@/utils";
 
 export default function BorderWaves(props: Props) {
   const [canvas, setCanvas] = useState<Canvas>();
@@ -17,7 +17,7 @@ export default function BorderWaves(props: Props) {
   };
 
   const defaults = {
-    lineWidth: 20,
+    lineWidth: 7,
     radius: 20,
     pointsPerMaxEdge: 50,
     waveLength: { min: 10, max: 20 },
@@ -79,6 +79,7 @@ export default function BorderWaves(props: Props) {
     private blurInterval = 2;
     private gradientTimer = 0;
     gradientInterval = props.gradientInterval || defaults.gradientInterval;
+    private maxBlurSize = 60;
 
     lineWidth = props.lineWidth || defaults.lineWidth;
     radius = props.radius || defaults.radius;
@@ -115,7 +116,7 @@ export default function BorderWaves(props: Props) {
       );
 
       this.border = rawBorder.map((p) => ({ ...p, px: p.x, py: p.y }));
-      this.blurs = [0, getRandomInt(0, 100)];
+      this.blurs = [0, getRandomInt(0, this.maxBlurSize)];
       this.gradients = [this.generateGradient(), this.generateGradient()];
 
       this.animate(0);
@@ -203,12 +204,16 @@ export default function BorderWaves(props: Props) {
       y0: number,
       x1: number,
       y1: number,
-      gradientState: GradientState
+      gradientState: GradientState,
+      A?: number
     ) {
       const grad = this.ctx.createLinearGradient(x0, y0, x1, y1);
       for (const stop of gradientState) {
         const [r, g, b, a] = stop.color;
-        grad.addColorStop(stop.offset, `rgba(${r}, ${g}, ${b}, ${a})`);
+        grad.addColorStop(
+          stop.offset,
+          `rgba(${r}, ${g}, ${b}, ${A !== undefined ? A : a})`
+        );
       }
       return grad;
     }
@@ -221,6 +226,10 @@ export default function BorderWaves(props: Props) {
       r: number,
       pointsPerMaxEdge: number
     ) {
+      w = w - this.lineWidth * 2;
+      h = h - this.lineWidth * 2;
+      x = x + this.lineWidth;
+      y = y + this.lineWidth;
       const maxEdge = Math.max(w, h);
 
       const pointsHorizontal = Math.round((w / maxEdge) * pointsPerMaxEdge);
@@ -286,6 +295,26 @@ export default function BorderWaves(props: Props) {
 
       return path;
     }
+    computeAnimatedNormals(points: { px: number; py: number }[]) {
+      let result = [];
+      const count = points.length;
+
+      for (let i = 0; i < count; i++) {
+        const prev = points[(i - 1 + count) % count];
+        const next = points[(i + 1) % count];
+
+        const dx = next.px - prev.px;
+        const dy = next.py - prev.py;
+
+        const length = Math.hypot(dx, dy) || 1; // avoid division by zero
+        const nx = -dy / length;
+        const ny = dx / length;
+
+        result.push({ px: prev.px, py: prev.py, nx, ny });
+      }
+
+      return result;
+    }
 
     draw() {
       this.ctx.clearRect(0, 0, this.width, this.height);
@@ -293,6 +322,8 @@ export default function BorderWaves(props: Props) {
       this.ctx.beginPath();
 
       this.ctx.rect(0, 0, this.width, this.height);
+
+      let newBorder = [];
 
       for (let i = 0; i < this.border.length; i++) {
         const point = this.border[i];
@@ -317,10 +348,12 @@ export default function BorderWaves(props: Props) {
 
         if (i === 0) this.ctx.moveTo(point.px, point.py);
         else this.ctx.lineTo(point.px, point.py);
+
+        newBorder.push({ px: point.px, py: point.py });
       }
       this.ctx.closePath();
 
-      this.ctx.lineWidth = this.lineWidth;
+      this.ctx.lineWidth = 1;
       const gradient = this.lerpGradient(
         this.gradients[0],
         this.gradients[1],
@@ -333,6 +366,10 @@ export default function BorderWaves(props: Props) {
         this.height,
         gradient.gradient
       );
+
+      this.ctx.fillStyle = ctxGradient;
+      this.ctx.fill("evenodd");
+
       this.ctx.strokeStyle = ctxGradient;
       this.ctx.shadowBlur = lerp(
         this.blurs[0],
@@ -341,9 +378,6 @@ export default function BorderWaves(props: Props) {
       );
       this.ctx.shadowColor = `rgba(${gradient.mainColor[0]}, ${gradient.mainColor[1]}, ${gradient.mainColor[2]}, ${gradient.mainColor[3]})`;
       this.ctx.stroke();
-
-      this.ctx.fillStyle = ctxGradient;
-      this.ctx.fill("evenodd");
     }
 
     isLeftOrRightEdge(
@@ -391,7 +425,7 @@ export default function BorderWaves(props: Props) {
       this.blurTimer += dt;
       if (this.blurTimer >= this.blurInterval) {
         this.blurTimer = 0;
-        this.blurs = [this.blurs[1], getRandomInt(0, 100)];
+        this.blurs = [this.blurs[1], getRandomInt(0, this.maxBlurSize)];
       }
 
       this.gradientTimer += dt;
@@ -412,6 +446,7 @@ export default function BorderWaves(props: Props) {
     <canvas
       id="modalCanvas"
       className={`blur-[2px] ${props.className}`}
+      style={props.style}
     ></canvas>
   );
 }

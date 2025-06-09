@@ -21,6 +21,7 @@ export type GradientState = ColorStop[];
 
 export type Props = {
   className?: string;
+  style?: React.CSSProperties;
   width?: number;
   height?: number;
   lineWidth?: number;

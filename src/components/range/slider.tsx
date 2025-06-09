@@ -20,6 +20,8 @@ export const Slider: React.FC<CustomSliderProps> = ({
   }, [max, min]);
   const [isDragging, setIsDragging] = useState(false);
   const [percent, setPercent] = useState(getPercent());
+  let lastX = 0;
+  let lastY = 0;
 
   function getPercent() {
     if (!thumbRef.current || !trackRef.current) return 50;
@@ -81,12 +83,14 @@ export const Slider: React.FC<CustomSliderProps> = ({
     const handleMove = (e: MouseEvent | TouchEvent) => {
       const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
       handlePosition(clientX);
+
+      e.preventDefault();
     };
     const stopDrag = () => setIsDragging(false);
 
     if (isDragging) {
       window.addEventListener("mousemove", handleMove);
-      window.addEventListener("touchmove", handleMove);
+      window.addEventListener("touchmove", handleMove, { passive: false });
       window.addEventListener("mouseup", stopDrag);
       window.addEventListener("touchend", stopDrag);
     }
